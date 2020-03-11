@@ -271,10 +271,11 @@ class Split2d(nn.Module):
             z1 = input
             mean, logs = self.split2d_prior(z1)
             z2 = gaussian_sample(mean, logs, temperature)
-            z = torch.cat((z1, z2), dim=1)
+            z = torch.cat((z1.unsqueeze(2), z2.unsqueeze(2)), dim=2).view(
+                z1.shape[0], -1, *z1.shape[2:])
             return z, logdet
         else:
-            z1, z2 = split_feature(input, "split")
+            z1, z2 = split_feature(input, "cross")
             mean, logs = self.split2d_prior(z1)
             logdet = gaussian_likelihood(mean, logs, z2) + logdet
             return z1, logdet
